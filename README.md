@@ -1,3 +1,6 @@
+# A more up-to-date fork than the original
+https://github.com/Woonivers/react-native-document-scanner
+
 ![Demo gif](https://raw.githubusercontent.com/Michaelvilleneuve/react-native-document-scanner/master/images/demo.gif)
 
 # React Native Document Scanner
