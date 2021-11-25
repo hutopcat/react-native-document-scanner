@@ -732,9 +732,22 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         }
 
         if (isIntent) {
+            FileOutputStream fos;
             InputStream inputStream = null;
             OutputStream realOutputStream = null;
-            try {
+         try {
+             
+             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { 
+                 ContentResolver resolver = getContentResolver();
+                 ContentValues contentValues = new ContentValues();
+                     contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, `fileName.jpg`); // Adding file name
+                     contentValues.put(MediaStore.MediaColumns.MIME_TYPE,"image/jpeg"); //Choosing media format
+                     contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Enviroment.DIRECTORY_PICTURES); //SAVING IMAGE DATA by default OR choosing SUB-DIR for saving: ${DIRECTORY_PICTURES}/Our_subdirectory
+                
+              fileUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+              fos = resolver.openOutputStream(Objects.requireNonNull(fileUri));
+
+             } else{
                 inputStream = new FileInputStream(fileName);
                 realOutputStream = mActivity.getContentResolver().openOutputStream(fileUri);
                 // Transfer bytes from in to out
@@ -743,22 +756,22 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
                 while ((len = inputStream.read(buffer)) > 0) {
                     realOutputStream.write(buffer, 0, len);
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                return;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            } finally {
-                try {
-                    inputStream.close();
-                    realOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
+             }
+         } catch (FileNotFoundException e) {
+             e.printStackTrace();
+             return;
+         } catch (IOException e) {
+             e.printStackTrace();
+             return;
+         } finally {
+             try {
+                 inputStream.close();
+                 realOutputStream.close();
+             } catch (IOException e) {
+                 e.printStackTrace();
+             }
+         }
+     
 
         Log.d(TAG, "wrote: " + fileName);
 
@@ -775,6 +788,8 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         // ((OpenNoteScannerApplication) getApplication()).getTracker().trackGoal(1);
 
         refreshCamera();
+
+    }
 
     }
 
