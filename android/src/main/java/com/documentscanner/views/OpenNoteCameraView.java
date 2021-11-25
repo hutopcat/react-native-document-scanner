@@ -716,6 +716,8 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         boolean isIntent = false;
         Uri fileUri = null;
 
+        updateOrRequestPermissions();
+
         String fileName = this.saveToDirectory(doc);
         String initialFileName = this.saveToDirectory(scannedDocument.original);
 
@@ -738,7 +740,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
          try {
              
              if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { 
-                 ContentResolver resolver = getContentResolver();
+                 ContentResolver resolver = mActivity.getContentResolver();
                  ContentValues contentValues = new ContentValues();
                      contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, `fileName.jpg`); // Adding file name
                      contentValues.put(MediaStore.MediaColumns.MIME_TYPE,"image/jpeg"); //Choosing media format
