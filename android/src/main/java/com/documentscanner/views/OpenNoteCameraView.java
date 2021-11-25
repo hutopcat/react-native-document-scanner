@@ -1,6 +1,6 @@
 package com.documentscanner.views;
 
-import android.Manifest;
+// import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContentResolver;
@@ -47,7 +47,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 // import androidx.activity.result.ActivityResultLauncher;
-import androidx.core.content.ContextCompat;
+// import androidx.core.content.ContextCompat;
 
 import com.documentscanner.BuildConfig;
 import com.documentscanner.ImageProcessor;
@@ -736,7 +736,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         }
 
         if (isIntent) {
-            FileOutputStream fos;
+            OutputStream fos;
             InputStream inputStream = null;
             OutputStream realOutputStream = null;
             try {
@@ -758,7 +758,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
                                                                                                               // ${DIRECTORY_PICTURES}/Our_subdirectory
 
                     fileUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-                    fos = resolver.openOutputStream(Objects.requireNonNull(fileUri));
+                    fos = resolver.openOutputStream(fileUri);
 
                 } else {
                     inputStream = new FileInputStream(fileName);
