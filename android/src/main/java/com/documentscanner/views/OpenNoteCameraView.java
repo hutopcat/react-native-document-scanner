@@ -3,6 +3,7 @@ package com.documentscanner.views;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -18,6 +19,7 @@ import android.media.ExifInterface;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Build;
+import android.content.ContentValues;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -44,7 +46,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import androidx.activity.result.ActivityResultLauncher;
+// import androidx.activity.result.ActivityResultLauncher;
 import androidx.core.content.ContextCompat;
 
 import com.documentscanner.BuildConfig;
@@ -131,9 +133,9 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     private OnScannerListener listener = null;
     private OnProcessingListener processingListener = null;
 
-    private boolean readPermissionGranted = false;
-    private boolean writePermissionGranted = false;
-    private ActivityResultLauncher<Array<String>> permissionsLauncher;
+    // private boolean readPermissionGranted = false;
+    // private boolean writePermissionGranted = false;
+    // private ActivityResultLauncher<Array<String>> permissionsLauncher;
 
     public interface OnScannerListener {
         void onPictureTaken(WritableMap path);
@@ -657,28 +659,31 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         return false;
     }
 
-    private void updateOrRequestPermissions() {
-        boolean hasReadPermission = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        boolean hasWritePermission = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        boolean minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+    // private void updateOrRequestPermissions() {
+    // boolean hasReadPermission = ContextCompat.checkSelfPermission(this,
+    // Manifest.permission.READ_EXTERNAL_STORAGE) ==
+    // PackageManager.PERMISSION_GRANTED;
+    // boolean hasWritePermission = ContextCompat.checkSelfPermission(this,
+    // Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+    // PackageManager.PERMISSION_GRANTED;
+    // boolean minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
 
-        readPermissionGranted = hasReadPermission;
-        writePermissionGranted = hasWritePermission || minSdk29;
+    // readPermissionGranted = hasReadPermission;
+    // writePermissionGranted = hasWritePermission || minSdk29;
 
-        List<String> permissionsToRequest = new ArrayList<>();
+    // List<String> permissionsToRequest = new ArrayList<>();
 
-        if (!writePermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (!readPermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionsLauncher.launch(permissionsToRequest.toArray(new String[listPermissionsNeeded.size()]));
-        }
-    }
+    // if (!writePermissionGranted) {
+    // permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    // }
+    // if (!readPermissionGranted) {
+    // permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+    // }
+    // if (permissionsToRequest.isNotEmpty()) {
+    // permissionsLauncher.launch(permissionsToRequest.toArray(new
+    // String[listPermissionsNeeded.size()]));
+    // }
+    // }
 
     public String saveToDirectory(Mat doc) {
         String fileName;
@@ -713,7 +718,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         boolean isIntent = false;
         Uri fileUri = null;
 
-        updateOrRequestPermissions();
+        // updateOrRequestPermissions();
 
         String fileName = this.saveToDirectory(doc);
         String initialFileName = this.saveToDirectory(scannedDocument.original);
