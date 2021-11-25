@@ -658,28 +658,25 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     }
 
     private void updateOrRequestPermissions() {
-        boolean hasReadPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-        boolean hasWritePermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-        boolean minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        boolean hasReadPermission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        boolean hasWritePermission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        boolean minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
 
-        readPermissionGranted = hasReadPermission
-        writePermissionGranted = hasWritePermission || minSdk29
+        readPermissionGranted = hasReadPermission;
+        writePermissionGranted = hasWritePermission || minSdk29;
 
-        val permissionsToRequest = mutableListOf<String>()
-        if(!writePermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        List<String> permissionsToRequest = new ArrayList<>();
+
+        if (!writePermissionGranted) {
+            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
-        if(!readPermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (!readPermissionGranted) {
+            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
-        if(permissionsToRequest.isNotEmpty()) {
-            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
+        if (permissionsToRequest.isNotEmpty()) {
+            permissionsLauncher.launch(permissionsToRequest.toArray(new String[listPermissionsNeeded.size()]));
         }
     }
 
@@ -737,61 +734,69 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
             FileOutputStream fos;
             InputStream inputStream = null;
             OutputStream realOutputStream = null;
-         try {
-             
-             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { 
-                 ContentResolver resolver = mActivity.getContentResolver();
-                 ContentValues contentValues = new ContentValues();
-                     contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, `fileName.jpg`); // Adding file name
-                     contentValues.put(MediaStore.MediaColumns.MIME_TYPE,"image/jpeg"); //Choosing media format
-                     contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Enviroment.DIRECTORY_PICTURES); //SAVING IMAGE DATA by default OR choosing SUB-DIR for saving: ${DIRECTORY_PICTURES}/Our_subdirectory
-                
-              fileUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-              fos = resolver.openOutputStream(Objects.requireNonNull(fileUri));
+            try {
 
-             } else{
-                inputStream = new FileInputStream(fileName);
-                realOutputStream = mActivity.getContentResolver().openOutputStream(fileUri);
-                // Transfer bytes from in to out
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = inputStream.read(buffer)) > 0) {
-                    realOutputStream.write(buffer, 0, len);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ContentResolver resolver = mActivity.getContentResolver();
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + ".jpg"); // Adding file name
+                    contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg"); // Choosing media format
+                    contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES); // SAVING
+                                                                                                              // IMAGE
+                                                                                                              // DATA by
+                                                                                                              // default
+                                                                                                              // OR
+                                                                                                              // choosing
+                                                                                                              // SUB-DIR
+                                                                                                              // for
+                                                                                                              // saving:
+                                                                                                              // ${DIRECTORY_PICTURES}/Our_subdirectory
+
+                    fileUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+                    fos = resolver.openOutputStream(Objects.requireNonNull(fileUri));
+
+                } else {
+                    inputStream = new FileInputStream(fileName);
+                    realOutputStream = mActivity.getContentResolver().openOutputStream(fileUri);
+                    // Transfer bytes from in to out
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = inputStream.read(buffer)) > 0) {
+                        realOutputStream.write(buffer, 0, len);
+                    }
                 }
-             }
-         } catch (FileNotFoundException e) {
-             e.printStackTrace();
-             return;
-         } catch (IOException e) {
-             e.printStackTrace();
-             return;
-         } finally {
-             try {
-                 inputStream.close();
-                 realOutputStream.close();
-             } catch (IOException e) {
-                 e.printStackTrace();
-             }
-         }
-     
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            } finally {
+                try {
+                    inputStream.close();
+                    realOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
-        Log.d(TAG, "wrote: " + fileName);
+            Log.d(TAG, "wrote: " + fileName);
 
-        if (isIntent) {
-            new File(fileName).delete();
-            mActivity.setResult(Activity.RESULT_OK, intent);
-            mActivity.finish();
-        } else {
-            animateDocument(fileName, scannedDocument);
-            addImageToGallery(fileName, mContext);
+            if (isIntent) {
+                new File(fileName).delete();
+                mActivity.setResult(Activity.RESULT_OK, intent);
+                mActivity.finish();
+            } else {
+                animateDocument(fileName, scannedDocument);
+                addImageToGallery(fileName, mContext);
+            }
+
+            // Record goal "PictureTaken"
+            // ((OpenNoteScannerApplication) getApplication()).getTracker().trackGoal(1);
+
+            refreshCamera();
+
         }
-
-        // Record goal "PictureTaken"
-        // ((OpenNoteScannerApplication) getApplication()).getTracker().trackGoal(1);
-
-        refreshCamera();
-
-    }
 
     }
 
