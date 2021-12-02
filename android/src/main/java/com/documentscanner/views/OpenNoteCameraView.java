@@ -131,10 +131,6 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     private OnScannerListener listener = null;
     private OnProcessingListener processingListener = null;
 
-    private boolean readPermissionGranted = false;
-    private boolean writePermissionGranted = false;
-    private ActivityResultLauncher<Array<String>> permissionsLauncher;
-
     public interface OnScannerListener {
         void onPictureTaken(WritableMap path);
     }
@@ -655,32 +651,6 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
             return true;
         }
         return false;
-    }
-
-    private void updateOrRequestPermissions() {
-        boolean hasReadPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-        boolean hasWritePermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-        boolean minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-
-        readPermissionGranted = hasReadPermission
-        writePermissionGranted = hasWritePermission || minSdk29
-
-        val permissionsToRequest = mutableListOf<String>()
-        if(!writePermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-        if(!readPermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        if(permissionsToRequest.isNotEmpty()) {
-            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
-        }
     }
 
     public String saveToDirectory(Mat doc) {
