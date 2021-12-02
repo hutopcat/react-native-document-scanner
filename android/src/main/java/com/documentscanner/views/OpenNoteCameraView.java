@@ -44,7 +44,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.core.content.ContextCompat;
 
 import com.documentscanner.BuildConfig;
