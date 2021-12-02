@@ -247,17 +247,17 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
             @Override
             public void onManagerConnected(int status) {
                 switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    Log.d(TAG, "SUCCESS init openCV: " + status);
-                    // System.loadLibrary("ndklibrarysample");
-                    enableCameraView();
-                }
-                    break;
-                default: {
-                    Log.d(TAG, "ERROR init Opencv: " + status);
-                    super.onManagerConnected(status);
-                }
-                    break;
+                    case LoaderCallbackInterface.SUCCESS: {
+                        Log.d(TAG, "SUCCESS init openCV: " + status);
+                        // System.loadLibrary("ndklibrarysample");
+                        enableCameraView();
+                    }
+                        break;
+                    default: {
+                        Log.d(TAG, "ERROR init Opencv: " + status);
+                        super.onManagerConnected(status);
+                    }
+                        break;
                 }
             }
         };
@@ -552,14 +552,14 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
     public void blinkScreenAndShutterSound() {
         AudioManager audio = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
         switch (audio.getRingerMode()) {
-        case AudioManager.RINGER_MODE_NORMAL:
-            MediaActionSound sound = new MediaActionSound();
-            sound.play(MediaActionSound.SHUTTER_CLICK);
-            break;
-        case AudioManager.RINGER_MODE_SILENT:
-            break;
-        case AudioManager.RINGER_MODE_VIBRATE:
-            break;
+            case AudioManager.RINGER_MODE_NORMAL:
+                MediaActionSound sound = new MediaActionSound();
+                sound.play(MediaActionSound.SHUTTER_CLICK);
+                break;
+            case AudioManager.RINGER_MODE_SILENT:
+                break;
+            case AudioManager.RINGER_MODE_VIBRATE:
+                break;
         }
     }
 
@@ -688,13 +688,25 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         boolean isIntent = false;
         Uri fileUri = null;
         String folderName = "documents";
-        File folder = new File(Environment.getExternalStorageDirectory().toString() + "/" + folderName);
-        if (!folder.exists()) {
-            folder.mkdirs();
-            Log.d(TAG, "wrote: created folder " + folder.getPath());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Log.d(TAG, "external file dir" + mContext.getExternalFilesDir(folderName).toString());
+            File folder = mContext.getExternalFilesDir(folderName);
+            if (!folder.exists()) {
+                folder.mkdirs();
+                Log.d(TAG, "wrote: created folder " + folder.getPath());
+            }
+            fileName = mContext.getExternalFilesDir(folderName).toString() + "/" + UUID.randomUUID()
+                    + ".jpg";
+        } else {
+            File folder = new File(Environment.getExternalStorageDirectory().toString() + "/" + folderName);
+            if (!folder.exists()) {
+                folder.mkdirs();
+                Log.d(TAG, "wrote: created folder " + folder.getPath());
+            }
+            fileName = Environment.getExternalStorageDirectory().toString() + "/" + folderName + "/" + UUID.randomUUID()
+                    + ".jpg";
         }
-        fileName = Environment.getExternalStorageDirectory().toString() + "/" + folderName + "/" + UUID.randomUUID()
-                + ".jpg";
 
         Mat endDoc = new Mat(Double.valueOf(doc.size().width).intValue(), Double.valueOf(doc.size().height).intValue(),
                 CvType.CV_8UC4);
