@@ -333,11 +333,21 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
         mCamera.lock();
 
         for (Camera.Size r : getResolutionList()) {
+            if (r.width > maxWidth && (float) r.width / r.height == (float) 16 / 9 ) {
+                Log.d(TAG, "supported preview resolution: " + r.width + "x" + r.height);
+                maxWidth = r.width;
+                curRes = r;
+            }
+        }
+
+        if (curRes == null) {
+            for (Camera.Size r : getResolutionList()) {
             if (r.width > maxWidth) {
                 Log.d(TAG, "supported preview resolution: " + r.width + "x" + r.height);
                 maxWidth = r.width;
                 curRes = r;
             }
+        }
         }
 
         return curRes;
