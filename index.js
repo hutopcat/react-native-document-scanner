@@ -6,7 +6,6 @@ import {
   Platform,
   PermissionsAndroid,
   DeviceEventEmitter,
-  Text
 } from "react-native";
 import PropTypes from "prop-types";
 
@@ -33,15 +32,18 @@ class PdfScanner extends React.Component {
     if (Platform.OS !== "android") return;
     try {
       const granted = await PermissionsAndroid.requestMultiple([
+        'android.permission.READ_MEDIA_IMAGES',
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
       ]);
 
       if (
-        granted["android.permission.READ_EXTERNAL_STORAGE"] ===
+        granted["android.permission.READ_MEDIA_IMAGES"] ===
+          PermissionsAndroid.RESULTS.GRANTED ||
+        (granted["android.permission.READ_EXTERNAL_STORAGE"] ===
           PermissionsAndroid.RESULTS.GRANTED &&
         granted["android.permission.WRITE_EXTERNAL_STORAGE"] ===
-          PermissionsAndroid.RESULTS.GRANTED
+          PermissionsAndroid.RESULTS.GRANTED)
       )
         this.setState({ permissionsAuthorized: true });
       else this.onPermissionsDenied();
