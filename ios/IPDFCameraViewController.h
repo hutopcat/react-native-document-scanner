@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DSRectangle.h"
 
 typedef NS_ENUM(NSInteger,IPDFCameraViewType)
 {
@@ -44,7 +45,7 @@ typedef NS_ENUM(NSInteger, IPDFRectangeType)
 
 - (void)focusAtPoint:(CGPoint)point completionHandler:(void(^)())completionHandler;
 
-- (void)captureImageWithCompletionHander:(void(^)(UIImage *data, UIImage *initialData, CIRectangleFeature *rectangleFeature))completionHandler;
+- (void)captureImageWithCompletionHander:(void(^)(UIImage *data, UIImage *initialData, DSRectangle *rectangleFeature))completionHandler;
 
 @property (nonatomic, strong) UIColor* overlayColor;
 @property (nonatomic, assign) float saturation;

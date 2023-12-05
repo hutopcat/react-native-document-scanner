@@ -33,7 +33,7 @@
 }
 
 - (void) capture {
-    [self captureImageWithCompletionHander:^(UIImage *croppedImage, UIImage *initialImage, CIRectangleFeature *rectangleFeature) {
+    [self captureImageWithCompletionHander:^(UIImage *croppedImage, UIImage *initialImage, DSRectangle *rectangleFeature) {
       if (self.onPictureTaken) {
             NSData *croppedImageData = UIImageJPEGRepresentation(croppedImage, self.quality);
 

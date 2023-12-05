@@ -14,6 +14,8 @@
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 #import <GLKit/GLKit.h>
+#import <Vision/Vision.h>
+#import "DSRectangle.h"
 
 @interface IPDFCameraViewController () <AVCaptureVideoDataOutputSampleBufferDelegate>
 
@@ -39,9 +41,11 @@
     CGFloat _imageDedectionConfidence;
     NSTimer *_borderDetectTimeKeeper;
     BOOL _borderDetectFrame;
-    CIRectangleFeature *_borderDetectLastRectangleFeature;
+
+    DSRectangle *_borderDetectLastRectangleFeature;
 
     BOOL _isCapturing;
+    BOOL _useVision;
 }
 
 - (void)awakeFromNib
@@ -185,7 +189,12 @@
     {
         if (_borderDetectFrame)
         {
-            _borderDetectLastRectangleFeature = [self biggestRectangleInRectangles:[[self highAccuracyRectangleDetector] featuresInImage:image]];
+            if (_useVision) {
+                NSLog(@"%@", NSStringFromCGRect(image.extent));
+                _borderDetectLastRectangleFeature = [[DSRectangle alloc] initWithVNRectangle:[self visionDetectRectangle:image] width:(int)image.extent.size.width height:(int)image.extent.size.height];
+            } else {
+                _borderDetectLastRectangleFeature = [[DSRectangle alloc] initWithCIRectangle:[self biggestRectangleInRectangles:[[self highAccuracyRectangleDetector] featuresInImage:image]]];
+            }
             _borderDetectFrame = NO;
         }
 
@@ -199,6 +208,7 @@
         {
             _imageDedectionConfidence = 0.0f;
         }
+
     }
 
     if (self.context && _coreImageContext)
@@ -226,7 +236,12 @@
 
 - (void)start
 {
-    if (![self.captureSession isRunning]){     
+    if (@available(iOS 11.0, *)) {
+        _useVision = YES;
+    } else {
+        _useVision = NO;
+    }
+    if (![self.captureSession isRunning]){
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             _isStopped = NO;
             [self.captureSession startRunning];
@@ -250,7 +265,7 @@
 
 - (void)stop
 {
-    if ([self.captureSession isRunning]){     
+    if ([self.captureSession isRunning]){
         _isStopped = YES;
 
         [self.captureSession stopRunning];
@@ -346,7 +361,7 @@
     }
 }
 
-- (void)captureImageWithCompletionHander:(void(^)(id data, id initialData, CIRectangleFeature *rectangleFeature))completionHandler
+- (void)captureImageWithCompletionHander:(void(^)(id data, id initialData, DSRectangle *rectangleFeature))completionHandler
 {
     if (_isCapturing) return;
 
@@ -395,7 +410,12 @@
 
              if (weakSelf.isBorderDetectionEnabled && rectangleDetectionConfidenceHighEnough(_imageDedectionConfidence))
              {
-                 CIRectangleFeature *rectangleFeature = [self biggestRectangleInRectangles:[[self highAccuracyRectangleDetector] featuresInImage:enhancedImage]];
+                 DSRectangle *rectangleFeature;
+                 if (_useVision) {
+                     rectangleFeature = [[DSRectangle alloc] initWithVNRectangle:[self visionDetectRectangle:enhancedImage] width:(int)enhancedImage.extent.size.width height:(int)enhancedImage.extent.size.height];
+                 } else {
+                     rectangleFeature = [[DSRectangle alloc] initWithCIRectangle:[self biggestRectangleInRectangles:[[self highAccuracyRectangleDetector] featuresInImage:enhancedImage]]];
+                 }
 
                  if (rectangleFeature)
                  {
@@ -452,7 +472,7 @@
     return [CIFilter filterWithName:@"CIColorControls" withInputParameters:@{@"inputContrast":@(1.0),kCIInputImageKey:image}].outputImage;
 }
 
-- (CIImage *)correctPerspectiveForImage:(CIImage *)image withFeatures:(CIRectangleFeature *)rectangleFeature
+- (CIImage *)correctPerspectiveForImage:(CIImage *)image withFeatures:(DSRectangle *)rectangleFeature
 {
   NSMutableDictionary *rectangleCoordinates = [NSMutableDictionary new];
   CGPoint newLeft = CGPointMake(rectangleFeature.topLeft.x + 30, rectangleFeature.topLeft.y);
@@ -522,6 +542,25 @@
     }
 
     return biggestRectangle;
+}
+
+- (VNRectangleObservation *)visionDetectRectangle:(CIImage *)image
+{
+    VNImageRequestHandler *requestHandler = [[VNImageRequestHandler alloc] initWithCIImage:image orientation:kCGImagePropertyOrientationUp options:@{}];
+    VNDetectRectanglesRequest *request = [[VNDetectRectanglesRequest alloc] init];
+    request.maximumObservations = 1;
+    request.minimumAspectRatio = 0;
+    request.maximumAspectRatio = 1;
+    NSError *error;
+
+    Boolean success = [requestHandler performRequests:@[request] error:&error];
+    if (error) {
+      NSLog(@"%@", error);
+    }
+    if (success && request.results.count > 0) {
+        return request.results[0];
+    }
+    return nil;
 }
 
 - (IPDFRectangeType) typeForRectangle: (CIRectangleFeature*) rectangle {
